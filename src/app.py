@@ -65,7 +65,12 @@ class Application:
 
     def get_printability_score(self):
         print(self.face_count, self.eye_count, self.smiling_scores)
-        avg_smile_score =  sum(self.smiling_scores) / len(self.smiling_scores)
+        avg_smile_score = 0 
+        if len(self.smiling_scores)!= 0:
+            avg_smile_score =  sum(self.smiling_scores) / len(self.smiling_scores)
+        else:
+            avg_smile_score = 0
+
         open_eye_ratio = None
         if self.face_count == 0:
             open_eye_ratio = 0
