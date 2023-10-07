@@ -11,8 +11,9 @@ from torchvision.models import efficientnet_b0
 
 
 class Application:
-    def __init__(self):
-        self.video_capture = cv2.VideoCapture(0)
+    def __init__(self, video_capture):
+        self.video_capture = video_capture
+        self.flag = "im_upload" 
 
         prototxt_path = "src\\deploy.prototxt.txt"
         model_path = "src\\res10_300x300_ssd_iter_140000_fp16.caffemodel"
@@ -77,8 +78,13 @@ class Application:
         else:
             open_eye_ratio = 0.5 *(self.eye_count / self.face_count ) #scaled to 1
 
-        print(avg_smile_score, open_eye_ratio)
-        return round(10 * ( (0.8* avg_smile_score ) + ( 0.2 * open_eye_ratio) ), 1)
+        print(f"Avg smile score : {avg_smile_score}, Open eye ratio: { open_eye_ratio}")
+        
+        score = round(10 * ( (0.8* avg_smile_score ) + ( 0.2 * open_eye_ratio) ), 1)
+        is_smiling = True if (avg_smile_score >= 0.4) else False 
+        eyes_open = True if (open_eye_ratio >= 0.8) else False
+
+        return  f"Score: {score}, Smiling: {is_smiling}, Eyes Open: {eyes_open}"
 
 
     def get_smiling_score(self, frame):
@@ -89,6 +95,7 @@ class Application:
         with torch.no_grad():
             output = self.smiling_model(input_batch)
             _, predicted = torch.max(output.data, 1)
+            print(output, predicted)
             
             print(self.smiling_class_map[predicted[0].item()])
             self.smiling_scores.append(self.smiling_score_map[predicted[0].item()])
@@ -125,7 +132,7 @@ class Application:
             roi_gray = gray[y:y + h, x:x + w]
 
             # Detect eyes in the region of interest
-            eyes = self.eye_cascade.detectMultiScale(roi_gray)
+            eyes = self.eye_cascade.detectMultiScale(roi_gray, minNeighbors = 6, minSize=(30,30))
 
             if len(eyes) > 2:
                 self.eye_count += 2
@@ -161,9 +168,10 @@ class Application:
                 image = Image.open(image).convert("RGB")
                 image = self.process_image(image)
                 st.image(image, caption="Uploaded Image", use_column_width=True)
+                st.write(self.get_printability_score()) 
 
-                prediction = self.get_printability_score()
-                st.write(f"Score: {prediction}")
+
+
     
 
     def live_video(self):
@@ -172,7 +180,7 @@ class Application:
         img = st.image([])
         container = st.empty()
 
-        while True:
+        while self.interface_option == "Live Video":
             ret, frame = self.video_capture.read()
             if not ret:
                 print("Could not read frame from cv capture.")
@@ -181,17 +189,14 @@ class Application:
         
             img.image(self.process_image(frame))
             container.empty()
-            container.text(f"Score : {self.get_printability_score()} ")
-
-        # video_capture.release()
-
+            container.text(self.get_printability_score())
 
     def window(self):
         st.title("Image Printability Rating")
 
-        interface_option = st.radio("Select Interface", ["Image Upload", "Live Video"])
+        self.interface_option = st.radio("Select Interface", ["Image Upload",  "Live Video"])
 
-        if interface_option == "Image Upload":
+        if self.interface_option == "Image Upload":
             self.im_upload()
         else:
             self.live_video()
@@ -199,6 +204,11 @@ class Application:
 
 
 if __name__ == "__main__":
-    app = Application()
-    app.window()
+    
+    video_capture = cv2.VideoCapture(0)
+    try:
+        app = Application(video_capture)
+        app.window()
+    except KeyboardInterrupt as e:
+        video_capture.release()
 

@@ -1,0 +1,7 @@
+streamlit
+PIL
+numpy
+opencv-python
+torch
+torchvision
+
