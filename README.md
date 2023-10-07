@@ -6,15 +6,13 @@
 ## FEATURES
 1. UI for image upload and inference
 2. Live video inference
-3. Camera picture inference
-4. Smiling ranking network using transfer learning on EffnetB0 (224x224) (5M params) w/ multiclass classifier (4 classes). <br> Data based on [FERplus](https://github.com/Microsoft/FERPlus) dataset (35k images for 8 different emotions, 10 people make choices for each image).  <br> The wide range of emotions should make the network better at detecting not_smiling instances. <br>
+3. Smiling ranking network using transfer learning on EffnetB0 (224x224) (5M params) w/ multiclass classifier (4 classes). <br> Data based on [FERplus](https://github.com/Microsoft/FERPlus) dataset (35k images for 8 different emotions, 10 people make choices for each image).  <br> The wide range of emotions should make the network better at detecting not_smiling instances. <br>
     Data was a little unbalanced, so underperforms at mild and moderate smiling predictions. <br>
     80.4% Test accuracy (mainly due to moderate and mild smiling classifications). 
 
-5. Face detection performed using OpenCV DNN and a small 140k param ResNet10 (300x300).
+4. Face detection using OpenCV DNN and a small 140k param ResNet10 (300x300).
 
-
-6. Eye cascades for blink detection. Low overhead and decent performance (except with glasses)
+5. Eye cascades for blink detection. Low overhead and decent performance (except with glasses)
 
 
 ## Rating Formula
