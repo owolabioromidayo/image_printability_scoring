@@ -15,12 +15,23 @@ class Application:
         self.video_capture = video_capture
         self.flag = "im_upload" 
 
-        prototxt_path = "src\\deploy.prototxt.txt"
-        model_path = "src\\res10_300x300_ssd_iter_140000_fp16.caffemodel"
-        self.face_model = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
+
+        checkpoint = None
 
         # face_cascade=cv2.CascadeClassifier('src\\cascades\\haarcascade_frontalface_default.xml')
-        self.eye_cascade= cv2.CascadeClassifier('src\\cascades\\haarcascade_eye.xml')
+        if os.name == "nt":
+            self.eye_cascade= cv2.CascadeClassifier('src\\cascades\\haarcascade_eye.xml')
+            prototxt_path = "src\\deploy.prototxt.txt"
+            model_path = "src\\res10_300x300_ssd_iter_140000_fp16.caffemodel"
+            self.face_model = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
+            checkpoint = torch.load("src\\smile_model.pth")
+        else:
+            self.eye_cascade= cv2.CascadeClassifier('src/cascades/haarcascade_eye.xml')
+            prototxt_path = "src/deploy.prototxt.txt"
+            model_path = "src/res10_300x300_ssd_iter_140000_fp16.caffemodel"
+            self.face_model = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
+            checkpoint = torch.load("src/smile_model.pth")
+
 
         # assert not face_cascade.empty() 
         assert not self.face_model.empty() 
@@ -57,7 +68,6 @@ class Application:
                 nn.Linear(64, 4),
                 )
 
-        checkpoint = torch.load("src\\smile_model.pth")
         self.smiling_model.load_state_dict(checkpoint)
         self.smiling_model.to(self.device)
 
