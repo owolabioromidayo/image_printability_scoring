@@ -14,7 +14,7 @@ class Application:
     def __init__(self, video_capture):
         self.video_capture = video_capture
         self.flag = "im_upload" 
-
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         checkpoint = None
 
@@ -24,13 +24,13 @@ class Application:
             prototxt_path = "src\\deploy.prototxt.txt"
             model_path = "src\\res10_300x300_ssd_iter_140000_fp16.caffemodel"
             self.face_model = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
-            checkpoint = torch.load("src\\smile_model.pth")
+            checkpoint = torch.load("src\\smile_model.pth", map_location=self.device)
         else:
             self.eye_cascade= cv2.CascadeClassifier('src/cascades/haarcascade_eye.xml')
             prototxt_path = "src/deploy.prototxt.txt"
             model_path = "src/res10_300x300_ssd_iter_140000_fp16.caffemodel"
             self.face_model = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
-            checkpoint = torch.load("src/smile_model.pth")
+            checkpoint = torch.load("src/smile_model.pth", map_location=self.device)
 
 
         # assert not face_cascade.empty() 
